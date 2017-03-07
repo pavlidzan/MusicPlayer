@@ -7,12 +7,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +30,7 @@ import static android.support.v4.content.LocalBroadcastManager.*;
  */
 
 public class ListFragment extends Fragment {
-
+    public static final String TAG ="ListFragment";
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -37,40 +39,18 @@ public class ListFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View v =inflater.inflate(R.layout.fragment_list, container, false);
+        mLocalReceiver= new LocalReceiver();
+        IntentFilter intentFilter = new IntentFilter(GetSongsIntentService.BROADCAST_ACTION);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mLocalReceiver, intentFilter);
         mSongBox = SongBox.initiateSongBox(getActivity());
         Intent intent = new Intent(getActivity(), GetSongsIntentService.class);
         getActivity().startService(intent);
-//        ContentResolver contentResolver = getActivity().getContentResolver();
-//        Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-//        Cursor cursor = contentResolver.query(uri, null, null, null, null);
-//        if (cursor == null){
-//            Toast.makeText(getActivity(), "Query failed", Toast.LENGTH_SHORT);
-//        } else if (!cursor.moveToFirst()){
-//            Toast.makeText(getActivity(), "No songs on your device", Toast.LENGTH_SHORT);
-//        } else {
-//            int titleColumn = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
-//            int idColumn = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
-//            int displayName = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
-//            int artistName = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
-//            do {
-//                long thisColumnId = cursor.getLong(idColumn);
-//                String thisTitle = cursor.getString(titleColumn);
-//                String thisDisplayName = cursor.getString(displayName);
-//                String thisArtistName = cursor.getString(artistName);
-//                Song song = new Song(thisTitle,thisArtistName,thisColumnId,thisDisplayName);
-//                mSongBox.addSong(song);
-//            } while (cursor.moveToNext());
-//        }
-//        cursor.close();
-        IntentFilter intentFilter = new IntentFilter(GetSongsIntentService.BROADCAST_ACTION);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.list_recycler_view);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyAdapter(mSongBox.getSongs());
         mRecyclerView.setAdapter(mAdapter);
-        mLocalReceiver= new LocalReceiver();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mLocalReceiver, intentFilter);
         return v;
     }
 
@@ -112,11 +92,12 @@ public class ListFragment extends Fragment {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "LocalReceiver.onReceive()");
             updateUI();
         }
     }
     public void updateUI(){
-
+        Log.i(TAG, "UpdateUI");
         mAdapter.notifyDataSetChanged();
     }
     @Override
