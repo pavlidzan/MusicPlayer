@@ -41,6 +41,9 @@ public class SongBox {
         Log.i(TAG, "Song with requested id isn't found");
         return null;
     }
+    public void emptyBox(){
+        mSongs.clear();
+    }
 
     public List<Song> getSongs(){
         return mSongs;

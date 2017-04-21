@@ -53,6 +53,8 @@ public class GetSongsIntentService extends IntentService {
             int idColumn = cursor.getColumnIndex(MediaStore.Audio.Media._ID);
             int displayName = cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME);
             int artistName = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
+            //dodati ciscenje mSongBox-a da se ne bi multiplicirao sadrzaj u recycler view
+            mSongBox.emptyBox();
             do {
                 long thisColumnId = cursor.getLong(idColumn);
                 String thisTitle = cursor.getString(titleColumn);
